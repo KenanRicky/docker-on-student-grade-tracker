@@ -4,8 +4,7 @@
   "description": "Student Grade Tracker REST API",
   "main": "src/server.js",
   "scripts": {
-    "start": "node src/server.js",
-    "dev": "nodemon src/server.js"
+    "start": "node src/server.js"
   },
   "dependencies": {
     "express": "^4.18.2",
