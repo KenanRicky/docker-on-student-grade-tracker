@@ -1,4 +1,4 @@
-cat > README.md << 'EOF'
+
 # 🎓 Student Grade Tracker
 
 A production-ready, containerised 3-tier web application built with
