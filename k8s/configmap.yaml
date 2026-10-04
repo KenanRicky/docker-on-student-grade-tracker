@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grade-tracker-config
+  namespace: grade-tracker
+data:
+  APP_ENV: "production"
+  DB_HOST: "postgres-service"
+  DB_PORT: "5432"
+  DB_NAME: "grades_db"
+  DB_USER: "postgres"
+  API_PORT: "3000"
