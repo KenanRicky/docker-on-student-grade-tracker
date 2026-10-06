@@ -945,6 +945,17 @@ https://hub.docker.com/repositories/kenanricky
 
 ![alt text](<Screenshot from 2026-09-21 17-59-08.png>)
 
+
+
+
+
+
+
+
+
+
+
+
 ## Author
 
 **Ricky Abura**
@@ -954,5 +965,145 @@ Student Grade Tracker — Dockerised Web Application Stack
 Built as an independent Docker and Docker Compose project.
 
 
+# 🎓 Student Grade Tracker — Kubernetes Independent Project
+
+A production-ready, three-tier student grade tracker application containerized with Docker and orchestrated on Kubernetes with persistent storage, configuration management, and robust networking.
+
+## Architecture Overview
+User (Browser)
+│
+▼ (NodePort: 30090)
+┌─────────────────────────┐
+│       Frontend          │  ← Nginx serving static HTML/JS (Port 80)
+└──────────┬──────────────┘
+│ HTTP API Requests (/api) via ClusterIP
+▼
+┌─────────────────────────┐
+│      Backend API        │  ← Node.js REST API (Port 3000)
+└──────────┬──────────────┘
+│ PostgreSQL Driver (Port 5432)
+▼
+┌─────────────────────────┐
+│       PostgreSQL        │  ← StatefulSet with PVC and HostPath Storage
+└─────────────────────────┘
 
 
+
+
+All resources live in the **`grade-tracker`** namespace.
+
+---
+
+## Kubernetes Files
+
+All manifests are in the `k8s/` directory.
+
+```text
+k8s/
+├── namespace.yaml
+├── configmap.yaml
+├── persistentvolume.yaml
+├── persistentvolumeclaim.yaml
+├── postgres-init-configmap.yaml
+├── postgres-headless-service.yaml
+├── postgres-service.yaml
+├── postgres-statefulset.yaml
+├── backend-services.yaml
+├── backend-deployment.yaml
+├── frontend-deployment.yaml
+├── frontend-service.yaml
+└── replicaset-exercise.yaml
+```
+
+## Deployment Instructions
+
+
+## Prerequisites
+
+- Minikube or any standard Kubernetes cluster
+- `kubectl` CLI configured
+- Docker installed locally
+
+Execute manifests in the exact dependency order:
+
+```bash
+# 1. Create Namespace
+kubectl apply -f k8s/namespace.yaml
+
+# 2. Create ConfigMap
+kubectl apply -f k8s/configmap.yaml
+
+# 3. Create Storage Resources
+kubectl apply -f k8s/persistentvolume.yaml
+kubectl apply -f k8s/persistentvolumeclaim.yaml
+
+# 4. Deploy Database Tier
+kubectl apply -f k8s/postgres-headless-service.yaml
+kubectl apply -f k8s/postgres-service.yaml
+kubectl apply -f k8s/postgres-statefulset.yaml
+
+# 5. Deploy Backend Tier
+kubectl apply -f k8s/backend-deployment.yaml
+
+# 6. Deploy Frontend Tier
+kubectl apply -f k8s/frontend-deployment.yaml
+
+
+
+## Deployment Instructions
+
+minikube service frontend-service -n grade-track
+
+## Prerequisites
+kubectl get pods -n grade-tracker
+![alt text](<Screenshot from 2026-10-04 20-37-43.png>)
+
+kubectl get pvc -n grade-tracker
+
+![alt text](<Screenshot from 2026-10-05 14-44-02.png>)
+
+## Troubleshooting
+
+
+Postgres -0 stuck in 'ContainerCreating' due to postgres-init-script  is missing in ConfigMap.
+
+ backend in `CrashLoopBackOff` or `Init:0/1` this is due to the fact that Database is not ready 
+/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 19-48-55.png
+
+## Solutions
+Created the missing postgres-init-configmap.yaml.
+Fix the postgres pod first; the backend recovers automatically
+/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 20-42-10.png
+
+Notes:
+
+* **Init script runs once.** `init.sql` only runs when the database volume is
+  empty. To re-run it, delete the PVC `postgres-storage-postgres-0`. This deletes the data.
+* **Keep the SQL in sync.** `k8s/postgres-init-configmap.yaml` holds a copy of
+  `database/init.sql`. Update both when the schema changes.
+* **Credentials.** The database password is set inline in the manifests. Move
+  it to a Kubernetes `Secret` for production.
+
+  ---
+
+## Repository
+
+GitHub:
+
+```text
+https://github.com/KenanRicky/docker-on-student-grade-tracker
+```
+
+Docker Hub:
+
+```text
+https://hub.docker.com/repositories/kenanricky
+```
+
+---
+
+## Author
+
+**Ricky Abura**
+
+Student Grade Tracker — Kubernetes Independent Project
