@@ -965,30 +965,32 @@ Student Grade Tracker — Dockerised Web Application Stack
 Built as an independent Docker and Docker Compose project.
 
 
+---
+
 # 🎓 Student Grade Tracker — Kubernetes Independent Project
 
 A production-ready, three-tier student grade tracker application containerized with Docker and orchestrated on Kubernetes with persistent storage, configuration management, and robust networking.
 
-## Architecture Overview
-User (Browser)
-│
-▼ (NodePort: 30090)
-┌─────────────────────────┐
-│       Frontend          │  ← Nginx serving static HTML/JS (Port 80)
-└──────────┬──────────────┘
-│ HTTP API Requests (/api) via ClusterIP
-▼
-┌─────────────────────────┐
-│      Backend API        │  ← Node.js REST API (Port 3000)
-└──────────┬──────────────┘
-│ PostgreSQL Driver (Port 5432)
-▼
-┌─────────────────────────┐
-│       PostgreSQL        │  ← StatefulSet with PVC and HostPath Storage
-└─────────────────────────┘
+## K8s Architecture Overview
 
-
-
+```text
+                 User (Browser)
+                       │
+                       ▼  NodePort 30090
+          ┌─────────────────────────┐
+          │        Frontend         │  ← Nginx serving static HTML/JS
+          └────────────┬────────────┘
+                       │  HTTP API requests (/api) via ClusterIP
+                       ▼
+          ┌─────────────────────────┐
+          │       Backend API       │  ← Node.js REST API (port 3000)
+          └────────────┬────────────┘
+                       │  PostgreSQL driver (port 5432)
+                       ▼
+          ┌─────────────────────────┐
+          │       PostgreSQL        │  ← StatefulSet with PVC storage
+          └─────────────────────────┘
+```
 
 All resources live in the **`grade-tracker`** namespace.
 
@@ -998,7 +1000,7 @@ All resources live in the **`grade-tracker`** namespace.
 
 All manifests are in the `k8s/` directory.
 
-
+```text
 k8s/
 ├── namespace.yaml
 ├── configmap.yaml
@@ -1013,24 +1015,29 @@ k8s/
 ├── frontend-deployment.yaml
 ├── frontend-service.yaml
 └── replicaset-exercise.yaml
+```
 
-## Deployment Instructions
+---
 
-
-## Prerequisites
+## K8s Prerequisites
 
 - Minikube or any standard Kubernetes cluster
 - `kubectl` CLI configured
 - Docker installed locally
 
-Execute manifests in the exact dependency order:
+---
+
+## K8s Deployment Instructions
+
+Execute the manifests in this dependency order:
 
 ```bash
 # 1. Create Namespace
 kubectl apply -f k8s/namespace.yaml
 
-# 2. Create ConfigMap
+# 2. Create ConfigMaps
 kubectl apply -f k8s/configmap.yaml
+kubectl apply -f k8s/postgres-init-configmap.yaml
 
 # 3. Create Storage Resources
 kubectl apply -f k8s/persistentvolume.yaml
@@ -1042,39 +1049,59 @@ kubectl apply -f k8s/postgres-service.yaml
 kubectl apply -f k8s/postgres-statefulset.yaml
 
 # 5. Deploy Backend Tier
+kubectl apply -f k8s/backend-services.yaml
 kubectl apply -f k8s/backend-deployment.yaml
 
 # 6. Deploy Frontend Tier
 kubectl apply -f k8s/frontend-deployment.yaml
+kubectl apply -f k8s/frontend-service.yaml
+```
 
+Open the application:
 
+```bash
+minikube service frontend-service -n grade-tracker
+```
 
-## Deployment Instructions
+---
 
-minikube service frontend-service -n grade-track
+## Verifying the Deployment
 
-## Prerequisites
+Check the pods:
+
+```bash
 kubectl get pods -n grade-tracker
-![alt text](<Screenshot from 2026-10-04 20-37-43.png>)
+```
 
+![kubectl get pods -n grade-tracker](<Screenshot from 2026-10-04 20-37-43.png>)
+
+Check the persistent volume claims:
+
+```bash
 kubectl get pvc -n grade-tracker
+```
 
-![alt text](<Screenshot from 2026-10-05 14-44-02.png>)
+![kubectl get pvc -n grade-tracker](<Screenshot from 2026-10-05 14-44-02.png>)
 
-## Troubleshooting
+---
 
+## K8s Troubleshooting
 
-Postgres -0 stuck in 'ContainerCreating' due to postgres-init-script  is missing in ConfigMap.
+### Problem
 
- backend in `CrashLoopBackOff` or `Init:0/1` this is due to the fact that Database is not ready 
-/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 19-48-55.png
+1. `postgres-0` stuck in `ContainerCreating` because the `postgres-init-script` ConfigMap was missing.
+2. Backend pods in `CrashLoopBackOff` or `Init:0/1` because the database was not ready.
 
-## Solutions
-Created the missing postgres-init-configmap.yaml.
-Fix the postgres pod first; the backend recovers automatically
-/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 20-42-10.png
+![Pods failing before the fix](<Screenshot from 2026-10-05 19-48-55.png>)
 
-Notes:
+### Solution
+
+1. Created the missing `k8s/postgres-init-configmap.yaml`.
+2. Fixed the postgres pod first; the backend recovered automatically.
+
+![Pods running after the fix](<Screenshot from 2026-10-05 20-42-10.png>)
+
+### Notes
 
 * **Init script runs once.** `init.sql` only runs when the database volume is
   empty. To re-run it, delete the PVC `postgres-storage-postgres-0`. This deletes the data.
@@ -1083,13 +1110,23 @@ Notes:
 * **Credentials.** The database password is set inline in the manifests. Move
   it to a Kubernetes `Secret` for production.
 
+---
 
-  /home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-15-41.png
+## K8s Evidence
 
-  /home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-18-18.png
+All pods running and the frontend opened with `minikube service`:
 
-/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-29-47.png
-  ---
+![All pods running and minikube service](<Screenshot from 2026-10-05 22-15-41.png>)
+
+Recording a grade in the application:
+
+![Recording a grade](<Screenshot from 2026-10-05 22-18-18.png>)
+
+Class statistics and all grades:
+
+![Class statistics and grades](<Screenshot from 2026-10-05 22-29-47.png>)
+
+---
 
 ## Repository
 
