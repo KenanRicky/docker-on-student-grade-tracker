@@ -1084,6 +1084,12 @@ Notes:
 * **Credentials.** The database password is set inline in the manifests. Move
   it to a Kubernetes `Secret` for production.
 
+
+  /home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-15-41.png
+
+  /home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-18-18.png
+
+/home/ricky/Pictures/Screenshots/Screenshot from 2026-10-05 22-29-47.png
   ---
 
 ## Repository
