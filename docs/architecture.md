@@ -83,3 +83,4 @@ Persistence was successfully validated by:
 3. Observing Kubernetes automatically recreate `postgres-0` via the StatefulSet controller.
 4. Verifying via UI browser refresh that all prior students and grade records persisted cleanly through the bound PVC and `hostPath` storage.
 
+

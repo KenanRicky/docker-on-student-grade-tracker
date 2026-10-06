@@ -998,7 +998,7 @@ All resources live in the **`grade-tracker`** namespace.
 
 All manifests are in the `k8s/` directory.
 
-```text
+
 k8s/
 ├── namespace.yaml
 ├── configmap.yaml
@@ -1013,7 +1013,6 @@ k8s/
 ├── frontend-deployment.yaml
 ├── frontend-service.yaml
 └── replicaset-exercise.yaml
-```
 
 ## Deployment Instructions
 
